@@ -5,12 +5,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { student parent instructor admin school_partner }
-enum Domain { visual_coding python web_development javascript ai_basics cyber_safety mobile_app }
-enum ChallengeType { python html_css_js javascript project quiz }
-enum SubmissionStatus { submitted checked needs_correction }
-enum PaymentStatus { pending paid failed refunded }
-enum CertificateStatus { pending issued revoked }
+enum Role {
+  student
+  parent
+  instructor
+  admin
+  school_partner
+}
+enum Domain {
+  visual_coding
+  python
+  web_development
+  javascript
+  ai_basics
+  cyber_safety
+  mobile_app
+}
+enum ChallengeType {
+  python
+  html_css_js
+  javascript
+  project
+  quiz
+}
+enum SubmissionStatus {
+  submitted
+  checked
+  needs_correction
+}
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+enum CertificateStatus {
+  pending
+  issued
+  revoked
+}
 
 model User {
   id             String @id @default(cuid())
