@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  student
+  parent
+  instructor
+  admin
+  school_partner
+}
+
+enum Domain {
+  visual_coding
+  web_development
+  mobile_app
+  ai_basics
+  cyber_safety
+  python
+}
+
+enum AdmissionStatus {
+  new
+  contacted
+  demo_booked
+  converted
+  rejected
+}
+
+enum SubmissionStatus {
+  submitted
+  checked
+  needs_correction
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum CertificateStatus {
+  pending
+  issued
+  revoked
+}
+
+model User {
+  id             String        @id @default(cuid())
+  name           String
+  email          String        @unique
+  phone          String?
+  password       String
+  role           Role          @default(student)
+  studentClass   String?
+  schoolName     String?
+  parentName     String?
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  instructorCourses Course[]   @relation("InstructorCourses")
+  submissions     Submission[]
+  payments        Payment[]
+  progress        Progress[]
+  certificates    Certificate[]
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  title       String
+  domain      Domain
+  classRange  String?
+  description String?
+  price       Int          @default(2000)
+  isPublished Boolean      @default(true)
+  instructorId String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  instructor  User?        @relation("InstructorCourses", fields: [instructorId], references: [id])
+  modules     Module[]
+  assignments Assignment[]
+  progress    Progress[]
+  certificates Certificate[]
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  videoUrl        String?
+  notesUrl        String?
+  durationMinutes Int?
+  moduleId        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  module          Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+model Admission {
+  id              String          @id @default(cuid())
+  studentName     String
+  studentClass    String
+  schoolName      String?
+  parentName      String?
+  parentPhone     String
+  email           String?
+  preferredCourse String?
+  message         String?
+  status          AdmissionStatus @default(new)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Assignment {
+  id           String       @id @default(cuid())
+  title        String
+  classRange   String?
+  instructions String?
+  dueDate      DateTime?
+  maxMarks     Int          @default(100)
+  courseId     String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  course       Course?      @relation(fields: [courseId], references: [id])
+  submissions  Submission[]
+}
+
+model Submission {
+  id            String           @id @default(cuid())
+  assignmentId  String
+  studentId     String
+  answerText    String?
+  fileUrl       String?
+  marks         Int?
+  feedback      String?
+  status        SubmissionStatus @default(submitted)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  assignment    Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student       User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  studentId     String?
+  studentName   String?
+  parentPhone   String?
+  amount        Int           @default(2000)
+  method        String        @default("manual")
+  transactionId String?
+  status        PaymentStatus @default(pending)
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  student       User?         @relation(fields: [studentId], references: [id])
+}
+
+model Progress {
+  id                String   @id @default(cuid())
+  studentId         String
+  courseId          String
+  completedLessons  String[] @default([])
+  attendancePercent Int      @default(0)
+  assignmentPercent Int      @default(0)
+  projectStatus     String   @default("Not Started")
+  teacherRemarks    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  student           User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course            Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id            String            @id @default(cuid())
+  studentId     String
+  courseId      String?
+  certificateId String            @unique
+  title         String?
+  issuedAt      DateTime?
+  status        CertificateStatus @default(pending)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  student       User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course        Course?           @relation(fields: [courseId], references: [id])
+}
