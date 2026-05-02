@@ -1,0 +1,4 @@
+import { prisma } from "@/lib/prisma";
+import { ok, fail } from "@/lib/api";
+import { getCurrentUser } from "@/lib/auth";
+export async function POST(req){try{const user=await getCurrentUser();if(!user||user.role!=='student')return fail('Only students can take quiz',403);const{quizId,answers}=await req.json();const quiz=await prisma.quiz.findUnique({where:{id:quizId},include:{questions:true}});if(!quiz)return fail('Quiz not found',404);let score=0,totalMarks=0;quiz.questions.forEach(q=>{totalMarks+=q.marks;if(String(answers?.[q.id]||'').trim().toLowerCase()===String(q.answer).trim().toLowerCase())score+=q.marks});const attempt=await prisma.quizAttempt.create({data:{quizId,studentId:user.id,answers,score,totalMarks}});return ok({attempt,score,totalMarks},201)}catch(e){return fail(e.message,500)}}

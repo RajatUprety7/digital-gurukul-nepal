@@ -2,22 +2,4 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import LogoutButton from "@/components/LogoutButton";
-
-export default async function InstructorDashboard() {
-  const user = await getCurrentUser();
-  if (!user || user.role !== "instructor") redirect("/login");
-
-  const [courses, assignments, submissions] = await Promise.all([
-    prisma.course.findMany({ take: 10 }),
-    prisma.assignment.findMany({ include: { course: { select: { title: true } } }, orderBy: { createdAt: "desc" }, take: 10 }),
-    prisma.submission.findMany({ include: { student: { select: { name: true, studentClass: true } }, assignment: { select: { title: true } } }, orderBy: { createdAt: "desc" }, take: 10 }),
-  ]);
-
-  return (
-    <main className="dashboard">
-      <div className="dashHeader"><div><h1>Instructor Dashboard</h1><p>Manage lessons, assignments, submissions and student feedback.</p></div><LogoutButton /></div>
-      <div className="dashGrid"><div className="dashPanel"><h3>Courses</h3><h2>{courses.length}</h2></div><div className="dashPanel"><h3>Assignments</h3><h2>{assignments.length}</h2></div><div className="dashPanel"><h3>Submissions</h3><h2>{submissions.length}</h2></div><div className="dashPanel"><h3>Role</h3><h2>Instructor</h2></div></div>
-      <section className="section" style={{ paddingLeft: 0, paddingRight: 0 }}><h2>Recent Submissions</h2><table className="table"><thead><tr><th>Student</th><th>Assignment</th><th>Status</th><th>Marks</th></tr></thead><tbody>{submissions.map((s) => <tr key={s.id}><td>{s.student?.name}</td><td>{s.assignment?.title}</td><td>{s.status}</td><td>{s.marks || "-"}</td></tr>)}</tbody></table></section>
-    </main>
-  );
-}
+export default async function InstructorDashboard(){const user=await getCurrentUser();if(!user||user.role!=='instructor')redirect('/login');const[courses,challenges,codeSubs,assignSubs,projects,quizzes,aiPractices]=await Promise.all([prisma.course.findMany({take:10}),prisma.codeChallenge.findMany({take:20}),prisma.codeSubmission.findMany({include:{student:true,challenge:true},orderBy:{createdAt:'desc'},take:20}),prisma.assignmentSubmission.findMany({include:{student:true,assignment:true},orderBy:{createdAt:'desc'},take:20}),prisma.projectSubmission.findMany({include:{student:true},orderBy:{createdAt:'desc'},take:20}),prisma.quiz.findMany({include:{questions:true},take:10}),prisma.aIPracticeSubmission.findMany({include:{student:true},orderBy:{createdAt:'desc'},take:20})]);return <main className="dashboard"><div className="dashHeader"><div><h1>Instructor Dashboard</h1><p>Review lessons, challenges, code, assignments and project work.</p></div><LogoutButton/></div><div className="stats"><div className="panel stat"><h3>Courses</h3><h2>{courses.length}</h2></div><div className="panel stat"><h3>Challenges</h3><h2>{challenges.length}</h2></div><div className="panel stat"><h3>Code Submissions</h3><h2>{codeSubs.length}</h2></div><div className="panel stat"><h3>Projects</h3><h2>{projects.length}</h2></div></div><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>Code Submissions</h2><table className="table"><thead><tr><th>Student</th><th>Challenge</th><th>Language</th><th>Output</th></tr></thead><tbody>{codeSubs.map(s=><tr key={s.id}><td>{s.student?.name}</td><td>{s.challenge?.title}</td><td>{s.language}</td><td>{s.output?.slice(0,80)}</td></tr>)}</tbody></table></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>Assignment Submissions</h2><table className="table"><thead><tr><th>Student</th><th>Assignment</th><th>Status</th><th>Marks</th></tr></thead><tbody>{assignSubs.map(s=><tr key={s.id}><td>{s.student?.name}</td><td>{s.assignment?.title}</td><td>{s.status}</td><td>{s.marks||'-'}</td></tr>)}</tbody></table></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>AI Practice Review</h2><table className="table"><thead><tr><th>Student</th><th>Task</th><th>Prompt</th><th>Score</th></tr></thead><tbody>{aiPractices.map(a=><tr key={a.id}><td>{a.student?.name}</td><td>{a.title||a.taskType}</td><td>{a.prompt?.slice(0,80)}</td><td>{a.score}</td></tr>)}</tbody></table></section></main>}

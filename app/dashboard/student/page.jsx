@@ -2,23 +2,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import LogoutButton from "@/components/LogoutButton";
-
-export default async function StudentDashboard() {
-  const user = await getCurrentUser();
-  if (!user || user.role !== "student") redirect("/login");
-
-  const [courses, assignments, progress] = await Promise.all([
-    prisma.course.findMany({ where: { isPublished: true }, take: 6 }),
-    prisma.assignment.findMany({ include: { course: { select: { title: true } } }, orderBy: { createdAt: "desc" }, take: 8 }),
-    prisma.progress.findMany({ where: { studentId: user.id }, include: { course: { select: { title: true } } }, take: 6 }),
-  ]);
-
-  return (
-    <main className="dashboard">
-      <div className="dashHeader"><div><h1>Student Dashboard</h1><p>Welcome {user.name}. Continue learning and submit your projects.</p></div><LogoutButton /></div>
-      <div className="dashGrid"><div className="dashPanel"><h3>My Class</h3><h2>{user.studentClass || "Class 4-10"}</h2></div><div className="dashPanel"><h3>Available Courses</h3><h2>{courses.length}</h2></div><div className="dashPanel"><h3>Assignments</h3><h2>{assignments.length}</h2></div><div className="dashPanel"><h3>Progress Records</h3><h2>{progress.length}</h2></div></div>
-      <section className="section" style={{ paddingLeft: 0, paddingRight: 0 }}><h2>Courses</h2><div className="courseGrid">{courses.map((c) => <article className="courseCard" key={c.id}><span>{c.classRange}</span><h3>{c.title}</h3><p>{c.description}</p></article>)}</div></section>
-      <section className="section" style={{ paddingLeft: 0, paddingRight: 0 }}><h2>Assignments</h2><table className="table"><thead><tr><th>Title</th><th>Course</th><th>Class</th><th>Marks</th></tr></thead><tbody>{assignments.map((a) => <tr key={a.id}><td>{a.title}</td><td>{a.course?.title}</td><td>{a.classRange}</td><td>{a.maxMarks}</td></tr>)}</tbody></table></section>
-    </main>
-  );
-}
+import CodingPlayground from "@/components/CodingPlayground";
+import ProjectSubmitForm from "@/components/ProjectSubmitForm";
+import AssignmentSubmitForm from "@/components/AssignmentSubmitForm";
+import AIPracticeLab from "@/components/AIPracticeLab";
+export default async function StudentDashboard(){const user=await getCurrentUser();if(!user||user.role!=='student')redirect('/login');const[courses,challenges,codeSubs,projects,assignments,assignmentSubs,quizzes,certificates,aiPractices]=await Promise.all([prisma.course.findMany({where:{isPublished:true},include:{modules:{include:{lessons:true}}},take:8}),prisma.codeChallenge.findMany({orderBy:{createdAt:'desc'}}),prisma.codeSubmission.findMany({where:{studentId:user.id},include:{challenge:true},orderBy:{createdAt:'desc'},take:8}),prisma.projectSubmission.findMany({where:{studentId:user.id},orderBy:{createdAt:'desc'},take:8}),prisma.assignment.findMany({include:{course:{select:{title:true}}},take:8}),prisma.assignmentSubmission.findMany({where:{studentId:user.id},include:{assignment:true},take:8}),prisma.quiz.findMany({include:{questions:true},take:3}),prisma.certificate.findMany({where:{studentId:user.id},take:5}),prisma.aIPracticeSubmission.findMany({where:{studentId:user.id},orderBy:{createdAt:'desc'},take:8})]);return <main className="dashboard"><div className="dashHeader"><div><h1>Student Integrated LMS</h1><p>Welcome {user.name}. Learn, practice code, submit assignments and projects.</p></div><LogoutButton/></div><div className="stats"><div className="panel stat"><h3>Courses</h3><h2>{courses.length}</h2></div><div className="panel stat"><h3>Challenges</h3><h2>{challenges.length}</h2></div><div className="panel stat"><h3>Code Submissions</h3><h2>{codeSubs.length}</h2></div><div className="panel stat"><h3>AI Practices</h3><h2>{aiPractices.length}</h2></div></div><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>My Courses & Lessons</h2><div className="grid">{courses.map(c=><div className="card" key={c.id}><small>{c.classRange}</small><h3>{c.title}</h3><p>{c.description}</p><b>Modules: {c.modules.length}</b>{c.modules.slice(0,2).map(m=><p key={m.id}>• {m.title} ({m.lessons.length} lessons)</p>)}</div>)}</div></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>Live Coding Practice</h2><CodingPlayground challenges={JSON.parse(JSON.stringify(challenges))}/></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>AI Practice Lab</h2><AIPracticeLab/></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><div className="grid3"><div><h2>Submit Assignment</h2><p>Submit answer text or project/file link.</p></div><div style={{gridColumn:'span 2'}}><AssignmentSubmitForm assignments={JSON.parse(JSON.stringify(assignments))}/></div></div></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><div className="grid3"><div><h2>Submit Project</h2><p>Submit Scratch, GitHub, Drive, app prototype or website link.</p></div><div style={{gridColumn:'span 2'}}><ProjectSubmitForm/></div></div></section><section className="section" style={{paddingLeft:0,paddingRight:0}}><h2>My Recent Code Submissions</h2><table className="table"><thead><tr><th>Challenge</th><th>Language</th><th>Status</th><th>Score</th></tr></thead><tbody>{codeSubs.map(s=><tr key={s.id}><td>{s.challenge?.title}</td><td>{s.language}</td><td>{s.status}</td><td>{s.score}</td></tr>)}</tbody></table></section></main>}

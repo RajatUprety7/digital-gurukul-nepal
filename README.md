@@ -1,110 +1,93 @@
-# Digital Gurukul Nepal - PostgreSQL Full-Stack Package
+# Digital Gurukul Nepal - Integrated Platform
 
-This version uses **PostgreSQL + Prisma**, not MongoDB.
+A complete integrated system that combines:
 
-## Included
+1. Public website and admission inquiry
+2. LMS course platform
+3. Student coding practice playground
+4. Admin dashboard
+5. Instructor dashboard
+6. Student dashboard
+7. PostgreSQL + Prisma backend
+8. Auth and role-based access
 
-### Frontend
-- Public website
-- Demo registration form
-- Login page
+## Main Features
+
+- Public landing website
+- Demo inquiry form
+- Login/logout
 - Admin dashboard
-- Student dashboard
 - Instructor dashboard
-
-### Backend
-- PostgreSQL database with Prisma ORM
-- JWT authentication using httpOnly cookies
-- Role-based access: student, parent, instructor, admin, school_partner
-- Admission API
-- Course API
-- Assignment API
-- Submission API
-- Payment API
-- Progress API
-- Certificate API
-- Seed script with demo accounts and sample data
+- Student dashboard
+- Courses, modules and lessons
+- Python practice in browser using Pyodide
+- HTML/CSS/JS live preview
+- JavaScript runner
+- Coding challenges
+- Code submission saving
+- Project submission links
+- Assignments and submissions
+- Quiz engine
+- Payments record tracking
+- Progress records
+- Certificates records
 
 ## Local Setup
 
-1. Install Node.js 20+
-2. Install PostgreSQL locally OR create a free PostgreSQL database on Neon/Supabase/Railway.
-3. Install packages:
-
 ```bash
 npm install
-```
-
-4. Create `.env.local` from `.env.example` and set:
-
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
-JWT_SECRET="your-long-secret"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
-
-5. Generate Prisma client:
-
-```bash
-npm run prisma:generate
-```
-
-6. Create database tables:
-
-```bash
-npm run prisma:migrate
-```
-
-Migration name prompt example:
-
-```text
-init
-```
-
-7. Seed demo data:
-
-```bash
+cp .env.example .env.local
+npm run prisma:push
 npm run seed
-```
-
-8. Run project:
-
-```bash
 npm run dev
 ```
 
-Open:
+## Vercel Setup
 
-```text
-http://localhost:3000
+Add environment variables:
+
+- DATABASE_URL
+- JWT_SECRET
+- SEED_SECRET
+- NEXT_PUBLIC_APP_URL
+
+Build command is already:
+
+```bash
+prisma generate && prisma db push && next build
 ```
 
-## Demo accounts after seed
+## Seed on Vercel
+
+After deployment, open:
+
+```text
+https://your-vercel-url.vercel.app/api/seed?secret=YOUR_SEED_SECRET
+```
+
+## Demo Logins
 
 Admin:
-admin@digitalgurukulnepal.com
-Admin@123
+admin@digitalgurukulnepal.com / Admin@123
 
 Instructor:
-instructor@digitalgurukulnepal.com
-Instructor@123
+instructor@digitalgurukulnepal.com / Instructor@123
 
 Student:
-student@digitalgurukulnepal.com
-Student@123
+student@digitalgurukulnepal.com / Student@123
 
-## Vercel Deployment
 
-1. Upload this project to GitHub.
-2. Create a PostgreSQL database on Neon/Supabase/Railway.
-3. Add environment variables in Vercel:
-   - DATABASE_URL
-   - JWT_SECRET
-   - NEXT_PUBLIC_APP_URL
-4. Deploy.
+## Added AI Practice System
 
-## Important
+This integrated version includes an AI Practice Lab where students can practice:
 
-- Do not use local PostgreSQL for Vercel. Use cloud PostgreSQL like Neon, Supabase or Railway.
-- Payment gateway is not integrated yet. Current payment module is manual tracking.
-- File upload is not included yet. Add Cloudinary/AWS S3 later.
+- Prompt writing
+- Responsible AI use
+- AI classification concepts
+- AI for cyber-safety/phishing analysis
+- Student reflection after AI activities
+- Simulated AI feedback and scoring
+- Saving AI practice records into PostgreSQL
+- Admin and instructor review of AI practice submissions
+
+This does not require an OpenAI API key. It uses a safe built-in simulator so students can practice AI concepts without external API cost.

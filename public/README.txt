@@ -1,1 +1,1 @@
-Place your logo, images, brochures and other public assets here.
+Place your logo, screenshots, brochures, videos, and certificates here.
